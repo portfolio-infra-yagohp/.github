@@ -13,3 +13,14 @@
 | **RF05** | Persistência Local (Resiliência) | O sistema deve armazenar os logs de texto em uma fila local (`pending_queue.jsonl`) e os PCAPs em uma pasta local (`pending_pcaps/`) antes do envio, garantindo que dados não sejam perdidos em caso de queda de rede. |
 | **RF06** | Compressão e Rotação de Logs | O sistema deve compactar (`.tar.gz`) e rotacionar diretórios de log antigos para liberar espaço em disco, conforme configurado. |
 | **RF07** | Verificação de Espaço em Disco | O sistema deve monitorar o espaço disponível no SD Card e interromper a coleta se o espaço livre cair abaixo do limite mínimo configurado (ex: 1GB). |
+
+### 1.2. Camada de Ingestão (API .NET + Load Balancer)
+
+| ID | Requisito | Descrição |
+| :--- | :--- | :--- |
+| **RF08** | Receber Logs em Lote | A API deve expor o endpoint `POST /api/v1/ingest/logs` para receber múltiplos eventos de telemetria em uma única requisição. |
+| **RF09** | Validar Autenticação | A API deve validar a `X-API-Key` enviada no header de cada requisição, rejeitando requisições não autenticadas. |
+| **RF10** | Registrar Dispositivos | A API deve registrar automaticamente novos dispositivos no DynamoDB (tabela `Devices`) na primeira vez que enviarem dados. |
+| **RF11** | Mander mecanismo de cache | A API deve gerenciar dados em cache para evitar muitas consultas diretas ao DynamoDB. |
+| **RF12** | Validar Metadados | A API deve validar a presença dos campos obrigatórios (`device_id`, `log_type`, `raw`) na mensagem. |
+| **RF13** | Publicar na Fila de Processamento | A API deve publicar cada lote validado em uma fila, para processamento assíncrono, retornando imediatamente `202 Accepted` ao dispositivo. |
