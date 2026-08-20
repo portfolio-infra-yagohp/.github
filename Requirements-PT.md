@@ -56,3 +56,37 @@
 
 ---
 
+## 2. Requisitos Não Funcionais (RNF)
+
+### 2.1. Performance
+
+| ID | Requisito | Descrição | Métrica |
+| :--- | :--- | :--- | :--- |
+| **RNF01** | Baixa Latência da API | A API .NET deve responder em menos de 200ms, pois apenas publica na SQS e retorna (não realiza processamento pesado). | P95 < 200ms |
+| **RNF02** | Throughput da Ingestão | O sistema deve suportar muitas requisições para a ingestão por segundo (ainda a definir), distribuídos entre as instâncias da API. | > 10k eventos/s ou 200 req/s |
+| **RNF03** | Indexação Rápida | A Lambda-Logs deve processar e indexar lotes de eventos no Elasticsearch em menos de 5 segundos para dados em "tempo real" (hot). | P95 < 5s |
+| **RNF04** | Cache de Baixa Latência | O Redis deve responder às consultas de cache (validação de dispositivo) em menos de 1ms para não se tornar um gargalo. | P99 < 1ms |
+
+### 2.2. Resiliência e Tolerância a Falhas
+
+| ID | Requisito | Descrição |
+| :--- | :--- | :--- |
+| **RNF05** | Zero Data Loss | O sistema deve garantir que nenhuma linha de log ou PCAP seja perdida, mesmo durante falhas de rede ou indisponibilidade da AWS. (Garantido por fila local + SQS + DLQ). |
+| **RNF06** | Graceful Degradation (Cache) | Se o Redis (EC2) falhar, a API deve consultar diretamente o DynamoDB (via Circuit Breaker + Fallback) e continuar operacional. |
+| **RNF07** | Recuperação de Falhas (DLQ) | Mensagens que falharem 3x no processamento da Lambda devem ser enviadas para a Dead Letter Queue (DLQ) para inspeção manual e re-drive. |
+| **RNF08** | Alta Disponibilidade da API | A API .NET deve rodar em pelo menos 2 instâncias EC2 com Load Balancer NGINX para tolerar falha de uma instância. |
+
+
+### 2.3. Segurança
+
+| ID | Requisito | Descrição |
+| :--- | :--- | :--- |
+| **RNF09** | Autenticação por API Key | Todas as requisições para a API de ingestão devem ser autenticadas via `X-API-Key`. |
+| **RNF10** | Criptografia em Trânsito | Todas as comunicações entre o dispositivo Android e a AWS (API e S3) devem utilizar TLS/HTTPS. |
+| **RNF11** | Controle de Acesso (IAM) | Os serviços AWS (Lambda, EC2) devem executar com papéis IAM com privilégios mínimos necessários (Least Privilege). |
+| **RNF12** | Rate Limiting | A API deve limitar o número de requisições por `device_id` (ex: 100 req/min) utilizando Redis para prevenir abusos. |
+
+
+
+
+
