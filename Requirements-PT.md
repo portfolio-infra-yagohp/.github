@@ -87,6 +87,33 @@
 | **RNF12** | Rate Limiting | A API deve limitar o número de requisições por `device_id` (ex: 100 req/min) utilizando Redis para prevenir abusos. |
 
 
+### 2.4. Escalabilidade
+
+| ID | Requisito | Descrição |
+| :--- | :--- | :--- |
+| **RNF13** | Escala Horizontal da API | O número de instâncias EC2 da API .NET deve poder ser aumentado horizontalmente para lidar com picos de tráfego. |
+| **RNF14** | Escala Automática das Lambdas | A Lambda-Text deve escalar automaticamente com o aumento de mensagens na fila SQS (gerenciado pela AWS). |
+| **RNF15** | Elasticidade do Elasticsearch | O cluster Elasticsearch deve ser dimensionado conforme o volume de dados (ex: via ILM e ajuste de shards). |
+
+### 2.5. Manutenibilidade e Qualidade de Código
+
+| ID | Requisito | Descrição |
+| :--- | :--- | :--- |
+| **RNF16** | Versionamento Semântico | Todos os artefatos (API, Lambdas, Scripts) devem ser versionados utilizando SemVer (v1.2.3). |
+| **RNF17** | Rastreabilidade (Tags Git) | Cada release deve ser marcada com uma tag no Git, garantindo que o código fonte de uma versão seja rastreável até o artefato implantado no S3. |
+| **RNF18** | Cobertura de Testes | O código da API .NET e das Lambdas deve ter cobertura mínima de 85% em testes unitários e incluir Smoke Tests no pipeline CI/CD. |
+| **RNF19** | Infraestrutura como Código (IaC) | Toda a infraestrutura AWS (EC2, SQS, S3, Lambda, etc.) deve ser provisionada via Terraform ou AWS CDK para garantir reprodutibilidade. |
+
+
+### 2.6. Custo e Retenção de Dados
+
+| ID | Requisito | Descrição |
+| :--- | :--- | :--- |
+| **RNF20** | Otimização de Custos | Utilizar serverless (Lambda, SQS) para processamento variável e armazenar dados brutos (PCAPs) no S3, mais barato que Elasticsearch. |
+| **RNF21** | Política de Retenção (ILM) | Dados no Elasticsearch devem ser movidos para "Warm" e "Cold" conforme a idade (ex: 7 dias Warm, 30 dias Cold) e deletados após 90 dias. |
+| **RNF22** | Política de Ciclo de Vida do S3 | PCAPs no S3 devem ser movidos para camadas Standard-IA (30 dias) e Glacier Deep Archive (180 dias) para reduzir custos. |
+| **RNF23** | Retenção de Artefatos | Manter as últimas 5 versões de artefatos no S3; versões mais antigas devem ser movidas para camadas frias ou deletadas. |
+
 
 
 
